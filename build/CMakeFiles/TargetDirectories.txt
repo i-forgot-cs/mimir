@@ -1,2 +1,8 @@
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/CMakeFiles/assistant.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/CMakeFiles/INSTALL.dir
 C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/CMakeFiles/ALL_BUILD.dir
 C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/json-build/CMakeFiles/INSTALL.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/json-build/CMakeFiles/ALL_BUILD.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/httplib-build/CMakeFiles/INSTALL.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/httplib-build/CMakeFiles/ALL_BUILD.dir
