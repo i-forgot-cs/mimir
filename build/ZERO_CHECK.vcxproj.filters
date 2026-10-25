@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\NAIRARNAV\Documents\GitHub\mimir\build\CMakeFiles\eddedacd7a34b03d057389fb928020da\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{2B8D41D6-72E3-3EE5-8A73-F323C27A097A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

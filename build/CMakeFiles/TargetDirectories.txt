@@ -1,0 +1,2 @@
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/CMakeFiles/ZERO_CHECK.dir
