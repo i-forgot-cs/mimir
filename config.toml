@@ -1,0 +1,12 @@
+# Settings for the local assistant. Edit freely; no rebuild needed.
+
+[ollama]
+host = "localhost"
+port = 11434
+model = "qwen3:4b"                     # used for normal text chat
+vision_model = "qwen3-vl:4b-instruct"  # used once an image is in the conversation
+think = false                          # false = skip "reasoning" on thinking models
+timeout_seconds = 300                  # first request can be slow while a model loads
+
+[assistant]
+system_prompt = "You are a helpful assistant. Keep answers concise unless asked for detail."

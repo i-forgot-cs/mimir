@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.20)
 project(local_assistant LANGUAGES CXX)
 
 # Use modern C++ and don't allow compiler-specific extensions.
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -23,14 +22,27 @@ FetchContent_Declare(
   GIT_TAG v0.18.0
 )
 
-FetchContent_MakeAvailable(json httplib)
+# TOML config file parser
+FetchContent_Declare(
+  tomlplusplus
+  GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+  GIT_TAG v3.4.0
+)
+
+FetchContent_MakeAvailable(json httplib tomlplusplus)
 
 # --- Our program ---
-add_executable(assistant src/main.cpp)
+add_executable(assistant
+  src/main.cpp
+  src/config.cpp
+  src/image.cpp
+  src/ollama_client.cpp
+)
 
 target_link_libraries(assistant PRIVATE
   nlohmann_json::nlohmann_json
   httplib::httplib
+  tomlplusplus::tomlplusplus
 )
 
 # Turn on warnings early; they teach you a lot.

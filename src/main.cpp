@@ -1,142 +1,108 @@
-// Milestone 2: a streaming terminal chat with conversation history.
+// Streaming terminal chat with image support. Settings come from config.toml.
 //
-// Commands while chatting:  /clear  (forget the conversation)   /quit  (exit)
+// Usage:  assistant.exe [path-to-config.toml]
+// Commands while chatting:
+//   /image <path>   attach an image to your NEXT message
+//   /clear          forget the conversation
+//   /quit           exit
 
+#include <cctype>
+#include <exception>
 #include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include <httplib.h>
-#include <nlohmann/json.hpp>
+#include "config.hpp"
+#include "image.hpp"
+#include "ollama_client.hpp"
 
 #ifdef _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>  // for SetConsoleOutputCP / SetConsoleCP
 #endif
 
-using json = nlohmann::json;
-
 namespace {
 
-constexpr const char* kHost = "localhost";
-constexpr int kPort = 11434;
-const std::string kModel = "qwen3:4b";  // change me
-
-// Thinking models (like qwen3) spend time "reasoning" before answering, which
-// feels slow in a chat. false asks Ollama to skip it. If your model complains
-// about this setting, delete the line that uses kThink below.
-constexpr bool kThink = false;
-
-json make_message(const std::string& role, const std::string& content) {
-    json m;
-    m["role"] = role;
-    m["content"] = content;
-    return m;
-}
-
-// Sends the whole conversation to Ollama and prints tokens as they arrive.
-// Returns the full reply text, or an empty string if something went wrong.
-std::string stream_chat(httplib::Client& client, const json& history) {
-    json body;
-    body["model"] = kModel;
-    body["messages"] = history;
-    body["stream"] = true;
-    body["think"] = kThink;
-
-    std::string reply;    // the complete answer, built up piece by piece
-    std::string pending;  // received bytes that don't form a full line yet
-    bool failed = false;
-
-    httplib::Request req;
-    req.method = "POST";
-    req.path = "/api/chat";
-    req.set_header("Content-Type", "application/json");
-    req.body = body.dump();
-
-    // httplib calls this every time a chunk of the response arrives.
-    // Ollama streams one JSON object per line ("NDJSON"), but a chunk can end
-    // in the middle of a line, so we buffer and only parse complete lines.
-    req.content_receiver = [&](const char* data, size_t len, uint64_t, uint64_t) {
-        pending.append(data, len);
-
-        size_t newline = 0;
-        while ((newline = pending.find('\n')) != std::string::npos) {
-            const std::string line = pending.substr(0, newline);
-            pending.erase(0, newline + 1);
-            if (line.empty()) continue;
-
-            try {
-                const json chunk = json::parse(line);
-
-                if (chunk.contains("error")) {
-                    std::cerr << "\n[Ollama error] " << chunk["error"].dump() << "\n";
-                    failed = true;
-                    return false;  // returning false stops the download
-                }
-
-                if (chunk.contains("message")) {
-                    const std::string text = chunk["message"].value("content", "");
-                    std::cout << text << std::flush;  // show it immediately
-                    reply += text;
-                }
-            } catch (const json::exception& e) {
-                std::cerr << "\n[could not parse a chunk: " << e.what() << "]\n";
-            }
-        }
-        return true;  // keep receiving
-    };
-
-    const auto res = client.send(req);
-
-    if (!res) {
-        std::cerr << "\nCould not reach Ollama at " << kHost << ":" << kPort << " ("
-                  << httplib::to_string(res.error()) << "). Is it running?\n";
-        return "";
-    }
-    if (failed || res->status != 200) {
-        if (res->status != 200) {
-            std::cerr << "\n[HTTP " << res->status << "]\n";
-        }
-        return "";
-    }
-    return reply;
+// Removes surrounding spaces and quotes. Windows' "Copy as path" wraps paths
+// in double quotes, so this lets you paste them straight in.
+std::string strip_quotes_and_space(std::string s) {
+    auto is_junk = [](unsigned char c) { return std::isspace(c) || c == '"' || c == '\''; };
+    while (!s.empty() && is_junk(static_cast<unsigned char>(s.back()))) s.pop_back();
+    std::size_t start = 0;
+    while (start < s.size() && is_junk(static_cast<unsigned char>(s[start]))) ++start;
+    return s.substr(start);
 }
 
 }  // namespace
 
-int main() {
+int main(int argc, char* argv[]) {
 #ifdef _WIN32
     // Make the console handle UTF-8 so accents and emoji display correctly.
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 #endif
 
-    httplib::Client client(kHost, kPort);
-    client.set_read_timeout(300, 0);  // first request may be slow (model loading)
+    const std::string config_path = (argc > 1) ? argv[1] : "config.toml";
 
-    json history = json::array();
+    assistant::Config config;
+    try {
+        config = assistant::load_config(config_path);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << "\n"
+                  << "(Run the program from the folder containing config.toml, "
+                     "or pass the path as an argument.)\n";
+        return 1;
+    }
 
-    std::cout << "Chatting with " << kModel << ".  /clear resets, /quit exits.\n";
+    const assistant::OllamaClient client(config);
+    std::vector<assistant::Message> history;
+    std::vector<std::string> pending_images;  // waiting to go with the next message
+
+    std::cout << "Chatting with " << config.model << ".\n"
+              << "/image <path> attaches an image, /clear resets, /quit exits.\n";
 
     std::string input;
     while (true) {
         std::cout << "\nyou> " << std::flush;
         if (!std::getline(std::cin, input) || input == "/quit") break;
         if (input.empty()) continue;
+
         if (input == "/clear") {
-            history = json::array();
+            history.clear();
+            pending_images.clear();
             std::cout << "(conversation cleared)\n";
             continue;
         }
 
-        history.push_back(make_message("user", input));
+        if (input.rfind("/image ", 0) == 0) {  // true if input starts with "/image "
+            const std::string path = strip_quotes_and_space(input.substr(7));
+            try {
+                pending_images.push_back(assistant::load_image_base64(path));
+                std::cout << "(image attached; type your question about it)\n";
+            } catch (const std::exception& e) {
+                std::cerr << e.what() << "\n";
+            }
+            continue;
+        }
+
+        // Send any attached images along with this message.
+        history.push_back({"user", input, std::move(pending_images)});
+        pending_images.clear();  // a moved-from vector is valid but unspecified; reset it
 
         std::cout << "\nai> " << std::flush;
-        const std::string reply = stream_chat(client, history);
-        std::cout << "\n";
-
-        if (reply.empty()) {
-            history.erase(history.size() - 1);  // drop the failed turn
-        } else {
-            history.push_back(make_message("assistant", reply));
+        try {
+            const std::string reply = client.chat(history, [](const std::string& piece) {
+                std::cout << piece << std::flush;  // show text as it arrives
+            });
+            std::cout << "\n";
+            history.push_back({"assistant", reply, {}});
+        } catch (const assistant::OllamaError& e) {
+            std::cerr << "\n[error] " << e.what() << "\n";
+            // Drop the failed turn, but keep its images so you can just retry.
+            pending_images = std::move(history.back().images);
+            history.pop_back();
         }
     }
 

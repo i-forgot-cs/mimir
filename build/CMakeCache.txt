@@ -275,6 +275,10 @@ FETCHCONTENT_SOURCE_DIR_HTTPLIB:PATH=
 // for json
 FETCHCONTENT_SOURCE_DIR_JSON:PATH=
 
+//When not empty, overrides where to find pre-populated content
+// for tomlplusplus
+FETCHCONTENT_SOURCE_DIR_TOMLPLUSPLUS:PATH=
+
 //Enables UPDATE_DISCONNECTED behavior for all content population
 FETCHCONTENT_UPDATES_DISCONNECTED:BOOL=OFF
 
@@ -283,6 +287,9 @@ FETCHCONTENT_UPDATES_DISCONNECTED_HTTPLIB:BOOL=OFF
 
 //Enables UPDATE_DISCONNECTED behavior just for population of json
 FETCHCONTENT_UPDATES_DISCONNECTED_JSON:BOOL=OFF
+
+//Enables UPDATE_DISCONNECTED behavior just for population of tomlplusplus
+FETCHCONTENT_UPDATES_DISCONNECTED_TOMLPLUSPLUS:BOOL=OFF
 
 //Git command line client
 GIT_EXECUTABLE:FILEPATH=C:/Program Files/Git/cmd/git.exe
@@ -420,6 +427,18 @@ nlohmann_json_IS_TOP_LEVEL:STATIC=OFF
 //Value Computed by CMake
 nlohmann_json_SOURCE_DIR:STATIC=C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/json-src
 
+//Value Computed by CMake
+tomlplusplus_BINARY_DIR:STATIC=C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/tomlplusplus-build
+
+//Use SYSTEM modifier for tomlplusplus's includes, disabling warnings
+tomlplusplus_INCLUDES_WITH_SYSTEM:BOOL=ON
+
+//Value Computed by CMake
+tomlplusplus_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+tomlplusplus_SOURCE_DIR:STATIC=C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/tomlplusplus-src
+
 
 ########################
 # INTERNAL cache entries
@@ -546,7 +565,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_MT
 CMAKE_MT-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=3
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=4
 //Platform information initialized
 CMAKE_PLATFORM_INFO_INITIALIZED:INTERNAL=1
 //noop for ranlib
@@ -621,4 +640,6 @@ ZLIB_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 ZLIB_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
 //CMAKE_INSTALL_PREFIX during last run
 _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=C:/Program Files/local_assistant
+//ADVANCED property for variable: tomlplusplus_INCLUDES_WITH_SYSTEM
+tomlplusplus_INCLUDES_WITH_SYSTEM-ADVANCED:INTERNAL=1
 

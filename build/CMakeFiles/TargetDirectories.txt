@@ -6,3 +6,5 @@ C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/json-build/CMakeFiles/INST
 C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/json-build/CMakeFiles/ALL_BUILD.dir
 C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/httplib-build/CMakeFiles/INSTALL.dir
 C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/httplib-build/CMakeFiles/ALL_BUILD.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/tomlplusplus-build/CMakeFiles/INSTALL.dir
+C:/Users/NAIRARNAV/Documents/GitHub/mimir/build/_deps/tomlplusplus-build/CMakeFiles/ALL_BUILD.dir
